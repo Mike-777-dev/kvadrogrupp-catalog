@@ -1,4 +1,4 @@
-const CACHE = 'kg-catalog-v6';
+const CACHE = 'kg-catalog-v7';
 const CORE = ['./', './index.html', './manifest.webmanifest',
               './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
@@ -20,8 +20,8 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // Pages are network-first so a published update (including the password
-  // gate) reaches existing users. Offline falls back to the cached page.
+  // Pages are network-first so published updates reach existing users.
+  // Offline falls back to the cached page.
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req).then(res => {

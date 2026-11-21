@@ -132,43 +132,9 @@ footer .foot-big{font-family:"Arial Narrow",Arial,sans-serif;font-size:24px;font
   .burger span{width:20px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-
-/* password gate */
-#gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-  padding:12px;background:#171b14;overscroll-behavior:contain}
-#gate.hidden{display:none}
-.gate__box{width:min(330px,100%);padding:18px 14px;border-radius:16px;
-  background:linear-gradient(160deg,#242b1e,#171b14);border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 24px 60px rgba(0,0,0,.55);text-align:center}
-.gate__mark{width:40px;height:40px;margin:0 auto 9px;border-radius:12px;
-  background:var(--accent);display:flex;align-items:center;justify-content:center;
-  font:800 21.6px/1 Arial,sans-serif;color:#fff}
-.gate__title{font:800 clamp(15.6px,4.8vw,20.4px)/1.1 "Arial Narrow",Arial,sans-serif;text-transform:uppercase;margin:0 0 5px}
-.gate__hint{color:var(--muted);font-size:13.2px;margin:0 0 13px}
-.gate__form{display:flex;flex-direction:column;gap:7px}
-.gate__input{width:100%;padding:9px 10px;border-radius:9px;border:1px solid #4a5540;
-  background:#11150e;color:#fff;font-size:15.6px;text-align:center;outline:none}
-.gate__input:focus{border-color:var(--accent)}
-.gate__btn{padding:9px 10px;border:0;border-radius:9px;background:var(--accent);
-  color:#fff;font-size:15.6px;font-weight:700;cursor:pointer}
-.gate__btn:active{transform:scale(.98)}
-.gate__err{min-height:14px;margin:7px 0 0;color:#ff8a70;font-size:13.2px}
 </style>
 </head>
 <body>
-<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
-  <div class="gate__box">
-    <div class="gate__mark">КГ</div>
-    <h1 class="gate__title" id="gateTitle">КвадроГрупп</h1>
-    <p class="gate__hint">Каталог доступен по паролю</p>
-    <form class="gate__form" id="gateForm">
-      <input class="gate__input" id="gatePass" type="password" placeholder="Пароль"
-             autocomplete="current-password" autocapitalize="off" spellcheck="false" required>
-      <button class="gate__btn" type="submit">Открыть каталог</button>
-    </form>
-    <p class="gate__err" id="gateErr" aria-live="polite"></p>
-  </div>
-</div>
 
 <header class="topbar" id="topbar">
   <div class="topbar__inner">
@@ -332,57 +298,6 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch(function () {});
   });
 }
-</script>
-<script>
-(function () {
-  const SHA = "66bc83933c5ea35b2c176a6461172bc36f2ac91d9224a45ccc6cc401a5e7459b";
-  const FNV = "600030ba";
-  const gate = document.getElementById('gate');
-  const form = document.getElementById('gateForm');
-  const input = document.getElementById('gatePass');
-  const err = document.getElementById('gateErr');
-
-  function fnv(s) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < s.length; i++) {
-      h ^= s.charCodeAt(i);
-      h = Math.imul(h, 0x01000193);
-    }
-    return ('00000000' + (h >>> 0).toString(16)).slice(-8);
-  }
-  async function sha256(s) {
-    const data = new TextEncoder().encode(s);
-    const buf = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-  function unlock() {
-    gate.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-  try {
-    if (sessionStorage.getItem('kg-unlocked') === '1') { unlock(); return; }
-  } catch (e) {}
-  document.body.style.overflow = 'hidden';
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    err.textContent = '';
-    const value = input.value;
-    let ok = false;
-    try {
-      if (window.crypto && crypto.subtle && window.isSecureContext) ok = (await sha256(value)) === SHA;
-      else ok = fnv(value) === FNV;
-    } catch (ex) { ok = fnv(value) === FNV; }
-    if (ok) {
-      try { sessionStorage.setItem('kg-unlocked', '1'); } catch (ex) {}
-      unlock();
-    } else {
-      err.textContent = 'Неверный пароль';
-      input.value = '';
-      input.focus();
-    }
-  });
-  input.focus();
-})();
 </script>
 </body>
 </html>
