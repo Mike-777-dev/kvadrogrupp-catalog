@@ -92,10 +92,6 @@ main{max-width:900px;margin:0 auto;padding:0 14px}
 .card__body{padding:16px}
 .card h3{font-size:clamp(21.6px,6.48vw,31.2px);line-height:1.08;font-weight:800;margin-bottom:8px;overflow-wrap:anywhere}
 .card__desc{color:#bfc7b7;font-size:16.2px;margin:0 0 9px}
-.card__bullets{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.card__bullets li{background:var(--card-2);border:1px solid var(--line);border-radius:8px;
-  padding:5px 8px;font-size:13.8px;color:#c8d0c0}
-
 .params{border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
 .params__title{font-size:13.2px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
   color:var(--muted);margin-bottom:8px}
@@ -118,6 +114,8 @@ footer{border-top:1px solid var(--line);background:#13170f;padding:24px 16px cal
 footer svg{height:30px;width:auto;display:block;margin:0 auto 12px;color:#fff}
 footer .foot-line{color:var(--muted);font-size:15px;margin:4px 0}
 footer .foot-big{font-family:"Arial Narrow",Arial,sans-serif;font-size:24px;font-weight:800;color:#fff}
+footer .foot-link{display:inline-block;margin-top:8px;color:var(--accent-2);text-decoration:none;
+  border-bottom:1px solid rgba(255,138,51,.5)}
 
 @media (min-width:700px){
   .topbar__inner,.cats__grid{padding-left:20px;padding-right:20px}
@@ -165,6 +163,7 @@ footer .foot-big{font-family:"Arial Narrow",Arial,sans-serif;font-size:24px;font
   <p class="foot-line foot-big">+7 800 505-83-82</p>
   <p class="foot-line">info@квадрогрупп.рф</p>
   <p class="foot-line">Свердловская обл., г. Среднеуральск, ул. Металлистов, 1</p>
+  <p class="foot-line"><a class="foot-link" href="https://квадрогрупп.рф" target="_blank" rel="noopener noreferrer">https://квадрогрупп.рф</a></p>
 </footer>
 
 <script>
@@ -225,14 +224,12 @@ function renderCat(){
           role="radio" aria-checked="${oi===(state[activeCat][pi]||0)}"
           data-card="${pi}" data-opt="${oi}">${esc(o.label)}${o.sub?'<span class="param__sub">'+esc(o.sub)+'</span>':''}</button>`).join('') +
        `</div>`).join('') : '';
-    const bullets = p.bullets.length ? `<ul class="card__bullets">${p.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>` : '';
     return `<article class="card">
       <div class="card__media${imgCut?' card__media--cut':''}"><img src="${imgSrc}" alt="${esc(p.title)}" loading="lazy" decoding="async">
         <span class="card__badge">${String(pi+1).padStart(2,'0')}</span></div>
       <div class="card__body">
         <h3>${esc(p.title)}</h3>
         <p class="card__desc">${esc(p.desc)}</p>
-        ${bullets}
         ${params ? `<div class="params">${params}</div>` : ''}
         <div class="price" aria-live="polite">
           <div class="price__label">Стоимость</div>
