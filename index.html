@@ -7,9 +7,37 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="КвадроГрупп">
 <meta name="theme-color" content="#1b1f17">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="КвадроГрупп">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
+<style>
+.pwa-install{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.62);
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.pwa-install[hidden]{display:none}
+.pwa-install__box{width:min(430px,100%);background:#20261b;border:1px solid rgba(255,255,255,.16);
+  border-radius:16px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.5);
+  font-size:16px;line-height:1.5;color:#dfe4d8}
+.pwa-install__title{font-size:20px;font-weight:800;margin-bottom:10px;color:#fff}
+.pwa-install__text{margin-bottom:18px}
+.pwa-install__text b{color:#ec6502}
+.pwa-install__row{display:flex;gap:10px}
+.pwa-install button{flex:1;border:0;border-radius:10px;padding:12px 10px;
+  font:inherit;font-weight:700;cursor:pointer}
+#pwaInstallBtn{background:#ec6502;color:#fff}
+#pwaInstallClose{background:#39402f;color:#dfe4d8}
+</style>
+<script>
+(function(){
+  var link=document.querySelector('link[rel=manifest]');
+  if(!link)return;
+  fetch(link.href).then(function(r){
+    var t=(r.headers.get('content-type')||'').toLowerCase();
+    if(t && !/manifest\+json|application\/json|text\/json/.test(t))link.href='manifest.json';
+  }).catch(function(){link.href='manifest.json';});
+})();
+</script>
 <title>Каталог продукции — КвадроГрупп</title>
 <style>
 :root{
@@ -296,7 +324,56 @@ try{
 renderCats();
 renderCat();
 </script>
+<div id="pwaInstall" class="pwa-install" hidden>
+<div class="pwa-install__box">
+<div class="pwa-install__title">Установить каталог как приложение</div>
+<div class="pwa-install__text" id="pwaInstallText"></div>
+<div class="pwa-install__row">
+<button type="button" id="pwaInstallBtn">Установить</button>
+<button type="button" id="pwaInstallClose">Понятно</button>
+</div>
+</div>
+</div>
 <script>
+(function(){
+  var banner=document.getElementById('pwaInstall');
+  var btn=document.getElementById('pwaInstallBtn');
+  var text=document.getElementById('pwaInstallText');
+  var deferred=null, shown=false;
+  var standalone=window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone===true || document.referrer.indexOf('android-app://')===0;
+  var ios=/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  function recentlyClosed(){
+    try{return Date.now()-(+localStorage.getItem('kg-pwa-hint')||0)<86400000;}catch(e){return false;}
+  }
+  function manual(){
+    btn.hidden=true;
+    text.innerHTML=ios
+      ? 'Откройте страницу именно в <b>Safari</b> → «Поделиться» → «Добавить на главный экран» → «Добавить». Если иконка уже есть, удалите её и добавьте заново.'
+      : 'В Chrome откройте ⋮ → <b>«Установить приложение»</b>. Если пункт называется «Добавить на главный экран» — удалите старую иконку и обновите страницу. Ссылка должна быть по <b>https</b>, иначе установка недоступна.';
+    banner.hidden=false;shown=true;
+  }
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();deferred=e;
+    if(standalone)return;
+    text.textContent='Каталог откроется без адресной строки и будет работать офлайн.';
+    btn.hidden=false;banner.hidden=false;shown=true;
+  });
+  btn.addEventListener('click',function(){
+    if(deferred){
+      deferred.prompt();
+      deferred.userChoice.then(function(){banner.hidden=true;});
+    }else manual();
+  });
+  document.getElementById('pwaInstallClose').addEventListener('click',function(){
+    banner.hidden=true;
+    try{localStorage.setItem('kg-pwa-hint',Date.now());}catch(e){}
+  });
+  if(standalone)return;
+  setTimeout(function(){if(!deferred && !shown && !recentlyClosed())manual();},1500);
+})();
+
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('sw.js').catch(function () {});

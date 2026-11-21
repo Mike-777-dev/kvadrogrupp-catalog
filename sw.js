@@ -1,4 +1,4 @@
-const CACHE = 'kg-catalog-v16';
+const CACHE = 'kg-catalog-v17';
 const CORE = ['./', './index.html', './manifest.webmanifest',
               './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
